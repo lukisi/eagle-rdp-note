@@ -119,7 +119,10 @@ Apro il progetto con VS Code (`code .`) e installo le apposite
 estensioni (cmake, c/c++, gdb, ...).  
 Vado sulla estensione (prospettiva?) `cmake` di vscode e vedo che
 ci sono vari target fra cui
-`FreeRDP/client/X11/xfreerdp-client (xfreerdp)`. Ne faccio il build.  
+`FreeRDP/client/X11/xfreerdp-client (xfreerdp)`. Ne faccio il build.
+
+### Debugging con vscode
+
 Eseguo in debug il progetto con questa configurazione nel file `launch.json`:
 
 ```
@@ -159,3 +162,7 @@ Un thread (realizzato in linux con `libpthread` del pacchetto `libc6-dev`
 incapsulato in `libwinpr3` che è un target di cmake di questo progetto)
 è stato avviato; esso esegue la funzione `xf_client_thread` che subito
 esegue la funzione `freerdp_connect`.
+
+
+*Nota:* indaga sull'uso di WITH_SERVER e WITH_SERVER_CHANNELS nel file `CMakeLists.txt`.  
+Vedi anche la sezione [FreeRDS](https://github.com/awakecoding/FreeRDP-Manuals/blob/master/Developer/FreeRDP-Developer-Manual.markdown#freerds) del manuale del developer.
