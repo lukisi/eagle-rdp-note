@@ -32,8 +32,6 @@ X.224 Connection Request PDU.
 La prima parte di questo PDU è un *TPKT Header*, come specificato
 dallo standard "`[T123]`" section 8.
 
-test
-
 ## Riferimenti trovati nel codice di FreeRDP
 
 Nella sezione 1.3.1.1 delle specifiche del protocollo "`[MS-RDPBCGR]`"
