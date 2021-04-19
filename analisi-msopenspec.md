@@ -36,19 +36,43 @@ Il *Session Host* risponde con un *X.224 Connection Confirm PDU*
 server sono incapsulati in *X.224 Data PDU*.
 
 **Basic Settings Exchange** - Di seguito il client
-invia un Multipoint Communication Service (MCS)
-Connect Initial PDU con un GCC Conference Create Request
+invia un *Multipoint Communication Service (MCS)*
+*Connect Initial PDU* con un *GCC Conference Create Request*
 ([2.2.1.3](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/db6713ee-1c0e-4064-a3b3-0fac30b4037b)).  
-Il Session Host risponde con un MCS Connect Response PDU con
-un GCC Conference Create Response
-([2.2.1.4](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/927de44c-7fe8-4206-a14f-e5517dc24b1c)).
+Il Session Host risponde con un *MCS Connect Response PDU* con
+un *GCC Conference Create Response*
+([2.2.1.4](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/927de44c-7fe8-4206-a14f-e5517dc24b1c)).  
+Questi pacchetti contengono principalmente delle impostazioni (tra le quali
+core data, security data, e network data) che sono comunicate dal client
+al server e anche dal server al client.
 
-### Composizione X.224 Connection Request PDU
+**Channel Connection** - Di seguito...
+
+...
+
+### Dettagli delle strutture
+
+**X.224 Connection Request PDU**
 
 La sezione 2.2.1.1 delle specifiche "`[MS-RDPBCGR]`" definisce la struttura
-del X.224 Connection Request PDU.  
+del X.224 Connection Request PDU.
+
 La prima parte di questo PDU è un *TPKT Header*, come specificato
-dallo standard "`[T123]`" section 8.
+dallo standard "`[T123]`" section 8. È costituito da 4 byte: il primo è
+la versione dello standard T.123, vale a dire 3. Il secondo è
+riservato. Gli ultimi 2 indicano la lunghezza totale del PDU.
+
+...
+
+**MCS Connect Initial PDU**
+
+La sezione 2.2.1.3 delle specifiche "`[MS-RDPBCGR]`" definisce la struttura
+del MCS Connect Initial PDU.
+
+Questo PDU incapusla un *GCC Conference Create Request*, che poi incapsula
+dei blocchi concatenati di dati di *settings* (impostazioni).
+
+La prima parte di questo PDU è di nuovo un *TPKT Header*.
 
 ...
 
