@@ -2,8 +2,9 @@
 
 Ho iniziato a leggere la documentazione di Microsoft per le specifiche del
 protocollo "`[MS-RDSOD]`: Remote Desktop Services", in particolare la versione
-7.0 del protocollo reperibile a questo
-[link](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdsod/072543f9-4bd4-4dc6-ab97-9a04bf9d2c6a).
+7.0 del protocollo reperibile a questo link:
+
+*   [MS-RDSOD](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdsod/072543f9-4bd4-4dc6-ab97-9a04bf9d2c6a).
 
 La definizione di questo protocollo fa riferimenti (e si appoggia) a una serie
 di altri protocolli definiti da Microsoft e a loro volta estendono o
@@ -20,28 +21,43 @@ di questo documento.
 Nella sezione di esempi (sezione 3.1 "`Example 1: Connecting from an RDP Client to an RD Session Host`") viene detto che come primo passo il
 RDP client inizia una connessione al RD Session Host inviando un
 `X.224` Connection Request protocol data unit (PDU), come descritto nel
-"`[MS-RDPBCGR]`" sezione 1.3.1.1.
+"`[MS-RDPBCGR]`" sezione 1.3.1.1.  
+[link al doc](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/023f1e69-cfe8-4ee6-9ee0-7e759fb4e4ee)
 
-In essa viene descritta la *RDP Connection Sequence*. Il primo passo è
-la trasmissione dal *client* al *Session Host* di un
-*X.224 Connection Request PDU*. Il *Session Host* risponde con un
-*X.224 Connection Confirm PDU*.
+In questo documento viene descritta la *RDP Connection Sequence*.
 
-La sezione 2.2.1.1 dello stesso "`[MS-RDPBCGR]`" definisce la struttura del
-X.224 Connection Request PDU.  
+**Connection Initiation** - Il primo
+passo è la trasmissione dal *client* al *Session Host* di un
+*X.224 Connection Request PDU*
+([2.2.1.1](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/18a27ef9-6f9a-4501-b000-94b1fe3c2c10)).
+Il *Session Host* risponde con un *X.224 Connection Confirm PDU*
+([2.2.1.2](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/13757f8f-66db-4273-9d2c-385c33b1e483)).  
+*Nota:* Da questo punto in avanti, tutti i dati scambiati tra client e
+server sono incapsulati in *X.224 Data PDU*.
+
+**Basic Settings Exchange** - Di seguito il client
+invia un Multipoint Communication Service (MCS)
+Connect Initial PDU con un GCC Conference Create Request
+([2.2.1.3](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/db6713ee-1c0e-4064-a3b3-0fac30b4037b)).  
+Il Session Host risponde con un MCS Connect Response PDU con
+un GCC Conference Create Response
+([2.2.1.4](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/927de44c-7fe8-4206-a14f-e5517dc24b1c)).
+
+### Composizione X.224 Connection Request PDU
+
+La sezione 2.2.1.1 delle specifiche "`[MS-RDPBCGR]`" definisce la struttura
+del X.224 Connection Request PDU.  
 La prima parte di questo PDU è un *TPKT Header*, come specificato
 dallo standard "`[T123]`" section 8.
+
+...
 
 ## Riferimenti trovati nel codice di FreeRDP
 
 Nella sezione 1.3.1.1 delle specifiche del protocollo "`[MS-RDPBCGR]`"
-viene descritta la *RDP Connection Sequence*.
+viene descritta la *RDP Connection Sequence*.  
+[link al doc](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/023f1e69-cfe8-4ee6-9ee0-7e759fb4e4ee)
 
 Vedo una corrispondenza nel file `libfreerdp/core/connection.c` nel progetto
 FreeRDP.  
-Nel commento all'inizio del file è descritta tale sequenza:
-
-*   Connection Initiation: The client initiates the connection by sending the server a Class 0 X.224 Connection Request PDU (section 2.2.1.1).
-*   The server responds with a Class 0 X.224 Connection Confirm PDU (section 2.2.1.2).
-*   From this point, all subsequent data sent between client and server is wrapped in an X.224 Data Protocol Data Unit (PDU).
-
+Nel commento all'inizio del file è riportata la medesima sequenza di operazioni.
