@@ -31,8 +31,9 @@ passo è la trasmissione dal *client* al *Session Host* di un
 *X.224 Connection Request PDU*
 ([2.2.1.1](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/18a27ef9-6f9a-4501-b000-94b1fe3c2c10)).
 Il *Session Host* risponde con un *X.224 Connection Confirm PDU*
-([2.2.1.2](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/13757f8f-66db-4273-9d2c-385c33b1e483)).  
-*Nota:* Da questo punto in avanti, tutti i dati scambiati tra client e
+([2.2.1.2](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/13757f8f-66db-4273-9d2c-385c33b1e483)).
+
+Da questo punto in avanti, tutti i dati scambiati tra client e
 server sono incapsulati in *X.224 Data PDU*.
 
 **Basic Settings Exchange** - Di seguito il client
@@ -46,7 +47,32 @@ Questi pacchetti contengono principalmente delle impostazioni (tra le quali
 core data, security data, e network data) che sono comunicate dal client
 al server e anche dal server al client.
 
-**Channel Connection** - Di seguito...
+**Channel Connection** - Di seguito il client invia un
+*MCS Erect Domain Request PDU*
+([2.2.1.5](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/04c60697-0d9a-4afd-a0cd-2cc133151a9c))
+seguito da un *MCS Attach User Request PDU*
+([2.2.1.6](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/f5d6a541-9b36-4100-b78f-18710f39f247))
+per connettere (*attach*) l'utente al dominio.  
+Il server risponde con un *MCS Attach User Confirm PDU*
+([2.2.1.7](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/3b3d850b-99b1-4a9a-852b-1eb2da5024e5))
+che contiene il *User Channel ID*. Altri channel ID (I/O channel,
+static virtual channels) il client li può
+reperire dai pacchetti GCC.  
+Dopo il client si unisce (*join*) al user channel, I/O channel e i vari
+static virtual channels tramite diversi
+*MCS Channel Join Request PDUs*
+([2.2.1.8](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/64564639-3b2d-4d2c-ae77-1105b4cc011b)).  
+Il server conferma ogni channel con un
+*MCS Channel Join Confirm PDU*
+([2.2.1.9](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/cfc938b5-041d-4c15-9909-81dd035b914e)).  
+*Nota:* Alcune versioni di MS RDP Client aspettano la Channel Join Confirm PDU
+prima di inviare la successiva Channel Join Request PDU. Altre versioni
+inviano tutte le richieste in blocco.
+
+Da questo punto in avanti, tutti i dati trasmessi dal client sono
+incapsulati in *MCS Send Data Request PDU*. Mentre i dati trasmessi
+dal server sono incapsulati in *MCS Send Data Indication PDU*. Questo
+in aggiunta al fatto che i dati sono incapsulati in *X.224 Data PDU*.
 
 ...
 
