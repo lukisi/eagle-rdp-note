@@ -112,9 +112,25 @@ cookie di auto-riconnessione) sono trasmessi al server
 dentro un *Client Info PDU*
 ([2.2.1.11](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/772d618e-b7d6-4cd0-b735-fa08af558f9d)).
 
+**6. Optional Connect-Time Auto-Detection** -
+Un rilevamento automatico delle caratteristiche della rete (latenza,
+larghezza di banda, ...) può essere fatto in questo momento (durante la
+sequenza di connessione).  
+Vengono scambiati tra client e server una collezione di PDU
+([2.2.14](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/925b8e3a-fe60-43fe-aaff-29f07dc18993))
+entro un determinato periodo di tempo con sufficiente volume di dati
+per avere risultati statisticamente rilevanti.
 
-
-...
+**7. Licensing** -
+Obiettivo di questa fase è che il server trasferisce al client una licenza
+perché esso la memorizzi e la possa presentare nelle prossime connessioni.  
+La sequenza di operazioni e di pacchetti trasmessi dipende da come il server
+intende gestire il meccanismo di licenza.  
+Questo documento assume che il client non riceve una licenza da
+memorizzare.  
+Per info dettagliate si veda
+[1.3](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpele/74d92d24-56cd-44ef-9c34-06a9346fa874)
+di "`[MS-RDPELE]`"
 
 ### Dettagli delle strutture
 
