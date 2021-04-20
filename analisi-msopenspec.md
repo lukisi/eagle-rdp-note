@@ -26,7 +26,10 @@ RDP client inizia una connessione al RD Session Host inviando un
 
 In questo documento viene descritta la *RDP Connection Sequence*.
 
-**Connection Initiation** - Il primo
+## RDP Connection Sequence
+
+**1. Connection Initiation** -
+Il primo
 passo è la trasmissione dal *client* al *Session Host* di un
 *X.224 Connection Request PDU*
 ([2.2.1.1](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/18a27ef9-6f9a-4501-b000-94b1fe3c2c10)).
@@ -36,7 +39,8 @@ Il *Session Host* risponde con un *X.224 Connection Confirm PDU*
 Da questo punto in avanti, tutti i dati scambiati tra client e
 server sono incapsulati in *X.224 Data PDU*.
 
-**Basic Settings Exchange** - Di seguito il client
+**2. Basic Settings Exchange** -
+Di seguito il client
 invia un *Multipoint Communication Service (MCS)*
 *Connect Initial PDU* con un *GCC Conference Create Request*
 ([2.2.1.3](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/db6713ee-1c0e-4064-a3b3-0fac30b4037b)).  
@@ -47,7 +51,8 @@ Questi pacchetti contengono principalmente delle impostazioni (tra le quali
 core data, security data, e network data) che sono comunicate dal client
 al server e anche dal server al client.
 
-**Channel Connection** - Di seguito il client invia un
+**3. Channel Connection** -
+Di seguito il client invia un
 *MCS Erect Domain Request PDU*
 ([2.2.1.5](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/04c60697-0d9a-4afd-a0cd-2cc133151a9c))
 seguito da un *MCS Attach User Request PDU*
@@ -73,6 +78,41 @@ Da questo punto in avanti, tutti i dati trasmessi dal client sono
 incapsulati in *MCS Send Data Request PDU*. Mentre i dati trasmessi
 dal server sono incapsulati in *MCS Send Data Indication PDU*. Questo
 in aggiunta al fatto che i dati sono incapsulati in *X.224 Data PDU*.
+
+**4. RDP Security Commencement** -
+A questo punto inizia la
+comunicazione crittografata, se è in forza la encryption con
+il meccanismo di sicurezza standard di RDP
+(sezione [5.3](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/8e8b2cca-c1fa-456c-8ecb-a82fc60b2322)).
+
+Il client capisce dal pacchetto GCC Conference Create Response se questa
+crittografia è in forza e riceve in esso anche la chiave pubblica del server
+e un numero random di 4 byte generato dal server.  
+Ora il client genera un numero random di 4 byte e lo comunica al server
+in modo crittografato. In seguito i due numeri sono usati (sia dal client
+che dal server) per generare chiavi di sessione con le quali il traffico
+RDP d'ora in avanti sarà crittografato.
+
+Il suddetto numero random generato dal client è trasmesso al server
+all'interno di un *Security Exchange PDU*
+([2.2.1.10](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/9cde84cd-5055-475a-ac8b-704db419b66f)).
+
+Se la encryption con questo meccanismo è in forza,
+tutti i dati trasmessi in seguito avranno un *security header*.  
+Fanno eccezione alcuni PDU che hanno sempre un *security header*, anche se
+la encryption con questo meccanismo non è in forza.  
+Inoltre alcune comunicazioni da server a client non possono venire
+criptate.  
+Tutte le comunicazioni da client a server possono (e devono) essere
+criptate, ma per le PDU di licenza questo è opzionale.
+
+**5. Secure Settings Exchange** -
+I dati sensibili del client (come username, password, e
+cookie di auto-riconnessione) sono trasmessi al server
+dentro un *Client Info PDU*
+([2.2.1.11](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/772d618e-b7d6-4cd0-b735-fa08af558f9d)).
+
+
 
 ...
 
