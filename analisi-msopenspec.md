@@ -156,11 +156,67 @@ cercare di realizzare e le necessarie credenziali.
 In alcuni casi il server si accorge delle avvenute connessioni nei
 canali side-band e prosegue. In altri casi il client invia un
 *Multitransport Response PDU*
-(section [2.2.15.2](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/fbf85772-51e9-4458-931d-c05b1d561e08))
+([2.2.15.2](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/fbf85772-51e9-4458-931d-c05b1d561e08))
 al server per farlo proseguire.
 
 **9. Capabilities Exchange** -
-The server sends the set of capabilities it supports to the client in a Demand Active PDU (section 2.2.1.13.1). The optional Monitor Layout PDU (section 2.2.12.1) is sent by the server after the Demand Active PDU. The client responds to the Demand Active PDU with its capabilities by sending a Confirm Active PDU (section 2.2.1.13.2). 
+Il server trasmette al client il set di capabilities che
+supporta, in un *Demand Active PDU*
+([2.2.1.13.1](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/a07abad1-38bb-4a1a-96c9-253e3d5440df)).  
+Subito dopo, opzionalmente, trasmette anche il *Monitor Layout PDU*
+([2.2.12.1](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/88186da8-2a0a-488e-ba8d-97af6cd89a3c)).  
+Il client risponde al Demand Active PDU trasmettendo al server
+il set di capabilities che
+supporta, in un *Confirm Active PDU*
+([2.2.1.13.2](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/4c3c2710-0bf0-4c54-8e69-aff40ffcde66)).
+
+**10. Connection Finalization** -
+In questa fase il client e il server si scambiano un set di PDU per
+finalizzare i dettagli della connessione. Quelli trasmessi dal client
+al server non hanno dipendenze su quelli trasmessi dal server al client,
+quindi possono essere trasmessi in un batch, purché la sequenza sia quella
+specificata di seguito.
+
+*   Il client trasmette un *Client Synchronize PDU*
+    ([2.2.1.14](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/e0027486-f99a-4f0f-991c-eda3963521c2)).
+
+*   Il client trasmette un *Client Control (Cooperate) PDU*
+    ([2.2.1.15](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/9d1e1e21-d8b4-4bfd-9caf-4b72ee91a713)).
+
+*   Il client trasmette un *Client Control (Request Control) PDU*
+    ([2.2.1.16](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/4f94e123-970b-4242-8cf6-39820d8e3d35)).
+
+*   Opzionalmente, Il client trasmette un set di *Persistent Key List PDUs*
+    ([2.2.1.17](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/2d122191-af10-4e36-a781-381e91c182b7)).
+
+*   Il client trasmette un *Font List PDU*
+    ([2.2.1.18](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/7067da0d-e318-4464-88e8-b11509cf0bd9)).
+
+I PDU trasmessi dal server al client hanno dipendenze su quelli
+trasmessi dal client al server.
+
+*   In risposta al *Confirm Active PDU* il server trasmette
+    un *Server Synchronize PDU*
+    ([2.2.1.19](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/5186005a-36f5-4f5d-8c06-968f28e2d992)).
+
+*   Dopo il server trasmette un *Server Control (Cooperate) PDU*
+    ([2.2.1.20](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/43296a04-6324-4cbf-93d1-8e056e969082)).
+
+*   In risposta al *Client Control (Request Control) PDU* il server trasmette
+    un *Server Control (Granted Control) PDU*
+    ([2.2.1.21](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/ff7bae0e-cd13-4776-83b2-ef1f45e1fc41)).
+
+*   In risposta al *Font List PDU* il server trasmette
+    un *Font Map PDU*
+    ([2.2.1.22](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/7ba6ba81-e4f4-46a7-9062-2d57a821be26)).
+
+Il client può iniziare a trasmettere al server gli input
+di mouse e tastiera subito dopo aver trasmesso
+il *Confirm Active PDU*.  
+Il server può iniziare a trasmettere al client gli output grafici
+subito dopo aver ricevuto il *Font List PDU*.
+
+**TODO** Besides input and graphics data, other data that can be exchanged between client and server after the connection has been finalized includes connection management information and virtual channel messages (exchanged between client-side plug-ins and server-side applications).
 
 ### Dettagli delle strutture
 
