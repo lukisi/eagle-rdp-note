@@ -16,9 +16,14 @@ di questo documento.
     Remote Desktop Protocol: Basic Connectivity and Graphics Remoting (versione 54.0)
 *   [ITU-T X.224](https://www.itu.int/rec/T-REC-X.224-199511-I/en)
 *   [ITU-T T.123](https://www.itu.int/rec/T-REC-T.123/en)
+*   [MS-RDPELE](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpele/3d3f160a-3ab3-4dfb-ba4e-47c27cd79409)
+    Remote Desktop Protocol: Licensing Extension
+*   [MS-RDPEMT](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpemt/d22b606c-32c4-4647-b356-86f75e23a22c)
+    Remote Desktop Protocol: Multitransport Extension
 
-
-Nella sezione di esempi (sezione 3.1 "`Example 1: Connecting from an RDP Client to an RD Session Host`") viene detto che come primo passo il
+Nella sezione di esempi (sezione 3.1
+"`Example 1: Connecting from an RDP Client to an RD Session Host`")
+viene detto che come primo passo il
 RDP client inizia una connessione al RD Session Host inviando un
 `X.224` Connection Request protocol data unit (PDU), come descritto nel
 "`[MS-RDPBCGR]`" sezione 1.3.1.1.  
@@ -131,6 +136,31 @@ memorizzare.
 Per info dettagliate si veda
 [1.3](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpele/74d92d24-56cd-44ef-9c34-06a9346fa874)
 di "`[MS-RDPELE]`"
+
+**8. Optional Multitransport Bootstrapping** -
+A questo punto il server può decidere di iniziare connessioni
+multitransport come definisce l'estensione Multitransport `[MS-RDPEMT]`
+(overview [1.3](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpemt/5aa61c5c-e864-4ec6-bd80-e1df51555a48)).
+
+L'estensione Multitransport `[MS-RDPEMT]` permette la realizzazione di
+connessioni multiple su diversi canali side-band. Queste connessioni
+possono essere di diverso tipo, poggiare su diversi protocolli per
+sfruttarne al meglio le caratteristiche a seconda del tipo di messaggi
+che si scambiano il server e il client e del loro uso.  
+Nella fase iniziale (RDP Connection Sequence) tramite un messaggio dal
+server al client (*Initiate Multitransport Request PDU*,
+[2.2.15.1](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/a6abf1a2-f0ea-427e-bf02-fae7beb09b6a))
+il client viene istruito su quali connessioni multitransport sicure può
+cercare di realizzare e le necessarie credenziali.
+
+In alcuni casi il server si accorge delle avvenute connessioni nei
+canali side-band e prosegue. In altri casi il client invia un
+*Multitransport Response PDU*
+(section [2.2.15.2](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/fbf85772-51e9-4458-931d-c05b1d561e08))
+al server per farlo proseguire.
+
+**9. Capabilities Exchange** -
+The server sends the set of capabilities it supports to the client in a Demand Active PDU (section 2.2.1.13.1). The optional Monitor Layout PDU (section 2.2.12.1) is sent by the server after the Demand Active PDU. The client responds to the Demand Active PDU with its capabilities by sending a Confirm Active PDU (section 2.2.1.13.2). 
 
 ### Dettagli delle strutture
 
