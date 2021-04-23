@@ -256,4 +256,8 @@ viene descritta la *RDP Connection Sequence*.
 
 Vedo una corrispondenza nel file `libfreerdp/core/connection.c` nel progetto
 FreeRDP.  
-Nel commento all'inizio del file è riportata la medesima sequenza di operazioni.
+Nel commento all'inizio del file è riportata la medesima sequenza
+di operazioni.
+
+Nel documento a questo [link](analisi-libfreerdp-core-connection.md)
+ne faccio una analisi.
