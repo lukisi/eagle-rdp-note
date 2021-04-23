@@ -17,9 +17,9 @@ di questo documento.
 *   [ITU-T X.224](https://www.itu.int/rec/T-REC-X.224-199511-I/en)
 *   [ITU-T T.123](https://www.itu.int/rec/T-REC-T.123/en)
 *   [MS-RDPELE](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpele/3d3f160a-3ab3-4dfb-ba4e-47c27cd79409)
-    Remote Desktop Protocol: Licensing Extension
+    Remote Desktop Protocol: Licensing Extension (versione 16.0)
 *   [MS-RDPEMT](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpemt/d22b606c-32c4-4647-b356-86f75e23a22c)
-    Remote Desktop Protocol: Multitransport Extension
+    Remote Desktop Protocol: Multitransport Extension (versione 11.0)
 
 Nella sezione di esempi (sezione 3.1
 "`Example 1: Connecting from an RDP Client to an RD Session Host`")
@@ -29,7 +29,7 @@ RDP client inizia una connessione al RD Session Host inviando un
 "`[MS-RDPBCGR]`" sezione 1.3.1.1.  
 [link al doc](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/023f1e69-cfe8-4ee6-9ee0-7e759fb4e4ee)
 
-In questo documento viene descritta la *RDP Connection Sequence*.
+Nella suddetta sezione del documento MS-RDPBCGR viene descritta la *RDP Connection Sequence*.
 
 ## RDP Connection Sequence
 
@@ -216,7 +216,11 @@ il *Confirm Active PDU*.
 Il server può iniziare a trasmettere al client gli output grafici
 subito dopo aver ricevuto il *Font List PDU*.
 
-**TODO** Besides input and graphics data, other data that can be exchanged between client and server after the connection has been finalized includes connection management information and virtual channel messages (exchanged between client-side plug-ins and server-side applications).
+Oltre a input da mouse e tastiera (dal client al server) e output grafici
+(dal server al client) altri dati possono venire trasmessi dal client o
+dal server, tra cui *connection management information* e
+*virtual channel messages* (scambiati tra plug-ins nel client e
+applicazioni nel server).
 
 ### Dettagli delle strutture
 
