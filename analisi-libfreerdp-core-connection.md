@@ -5,10 +5,12 @@ In questo file il commento all'inizio fa riferimento alla
 [1.3.1.1](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/023f1e69-cfe8-4ee6-9ee0-7e759fb4e4ee)
 delle specifiche del protocollo "`[MS-RDPBCGR]`".
 
-La funzione `rdp_client_connect`
-viene chiamata verso l'inizio dell'esecuzione del programma.
-
+Verso l'inizio dell'esecuzione del programma viene chiamata
+la funzione `freerdp_connect` (file `libfreerdp/core/freerdp.c`).  
+Questa chiama la funzione `rdp_client_connect`
+(file `libfreerdp/core/connection.c`).  
 Verso la fine di questa funzione abbiamo questo stralcio di codice C.
+
 
 ```c
 	/* everything beyond this point is event-driven and non blocking */
@@ -45,6 +47,7 @@ Il tipo del membro `rdp->transport` è `struct rdp_transport`:
 ```c
 struct rdp_rdp
 {
+	int state;
 ...
 	rdpTransport* transport;
 ...
@@ -317,3 +320,179 @@ enum CLIENT_CONNECTION_STATE
 };
 ```
 
+Ci interessa vedere cosa fa il codice del client FreeRDP
+dopo la fase *Connection Finalization*.  
+Lo stato deve passare per `CONNECTION_STATE_CAPABILITIES_EXCHANGE`;
+poi quando il client trasmette un *Confirm Active PDU*
+lo stato raggiunge `CONNECTION_STATE_FINALIZATION`;
+infine, secondo il protocollo, il client trasmetterà
+un *Font List PDU* e da quel momento
+il server può iniziare a trasmettere al client gli output grafici.
+
+La funzione/event-handler `rdp_recv_callback` riceve la struttura
+`rdpRdp* rdp` come parametro `void* extra`. Di questa struttura
+esamina il membro `state`.
+
+### CONNECTION_STATE_CAPABILITIES_EXCHANGE
+
+Se lo stato è `CONNECTION_STATE_CAPABILITIES_EXCHANGE`:
+
+*   chiama la funzione `rdp_client_connect_demand_active(rdpRdp* rdp, wStream* s)`
+    (nel file `libfreerdp/core/connection.c`).
+    *   Questa chiama la funzione `rdp_recv_demand_active(rdp, s)`
+        (nel file `libfreerdp/core/capabilities.c` siccome questa fase
+        è chiamata *Capabilities Exchange*);
+    *   poi chiama `rdp_send_confirm_active(rdp)`;
+    *   poi chiama `input_register_client_callbacks(rdp->input)`;
+    *   poi chiama `rdp_client_transition_to_state(rdp, CONNECTION_STATE_FINALIZATION)`;
+    *   infine chiama `rdp_client_connect_finalize(rdp)` e restituisce quello
+        che ottiene, cioè 0 se tutto ok oppure -1.
+        *   La funzione `rdp_client_connect_finalize(rdpRdp* rdp)`
+            (nel file `libfreerdp/core/connection.c`) si occupa
+            di trasmettere le PDU dal client che completano la
+            fase *Connection Finalization*;
+        *   per ultimo invia un *Font List PDU* chiamando la funzione
+            `rdp_send_client_font_list_pdu(rdp, FONTLIST_FIRST | FONTLIST_LAST)`;
+        *   infine restituisce 0.
+
+### CONNECTION_STATE_FINALIZATION
+
+Se lo stato è `CONNECTION_STATE_FINALIZATION`:
+
+*   ...
+
+```c
+		case CONNECTION_STATE_FINALIZATION:
+			status = rdp_recv_pdu(rdp, s);
+
+			if ((status >= 0) && (rdp->finalize_sc_pdus == FINALIZE_SC_COMPLETE))
+			{
+				rdp_client_transition_to_state(rdp, CONNECTION_STATE_ACTIVE);
+				return 2;
+			}
+
+			if (status < 0)
+				WLog_DBG(TAG, "%s: %s - rdp_recv_pdu() - %i", __FUNCTION__,
+				         rdp_server_connection_state_string(rdp->state), status);
+
+			break;
+```
+
+
+### CONNECTION_STATE_ACTIVE
+
+Se lo stato è `CONNECTION_STATE_ACTIVE`:
+
+*   ...
+
+
+```c
+		case CONNECTION_STATE_ACTIVE:
+			status = rdp_recv_pdu(rdp, s);
+
+			if (status < 0)
+				WLog_DBG(TAG, "%s: %s - rdp_recv_pdu() - %i", __FUNCTION__,
+				         rdp_server_connection_state_string(rdp->state), status);
+
+			break;
+```
+
+
+***
+
+Riporto la funzione `rdp_client_transition_to_state`
+
+```c
+int rdp_client_transition_to_state(rdpRdp* rdp, int state)
+{
+	int status = 0;
+
+	switch (state)
+	{
+		case CONNECTION_STATE_INITIAL:
+			rdp->state = CONNECTION_STATE_INITIAL;
+			break;
+
+		case CONNECTION_STATE_NEGO:
+			rdp->state = CONNECTION_STATE_NEGO;
+			break;
+
+		case CONNECTION_STATE_NLA:
+			rdp->state = CONNECTION_STATE_NLA;
+			break;
+
+		case CONNECTION_STATE_MCS_CONNECT:
+			rdp->state = CONNECTION_STATE_MCS_CONNECT;
+			break;
+
+		case CONNECTION_STATE_MCS_ERECT_DOMAIN:
+			rdp->state = CONNECTION_STATE_MCS_ERECT_DOMAIN;
+			break;
+
+		case CONNECTION_STATE_MCS_ATTACH_USER:
+			rdp->state = CONNECTION_STATE_MCS_ATTACH_USER;
+			break;
+
+		case CONNECTION_STATE_MCS_CHANNEL_JOIN:
+			rdp->state = CONNECTION_STATE_MCS_CHANNEL_JOIN;
+			break;
+
+		case CONNECTION_STATE_RDP_SECURITY_COMMENCEMENT:
+			rdp->state = CONNECTION_STATE_RDP_SECURITY_COMMENCEMENT;
+			break;
+
+		case CONNECTION_STATE_SECURE_SETTINGS_EXCHANGE:
+			rdp->state = CONNECTION_STATE_SECURE_SETTINGS_EXCHANGE;
+			break;
+
+		case CONNECTION_STATE_CONNECT_TIME_AUTO_DETECT:
+			rdp->state = CONNECTION_STATE_CONNECT_TIME_AUTO_DETECT;
+			break;
+
+		case CONNECTION_STATE_LICENSING:
+			rdp->state = CONNECTION_STATE_LICENSING;
+			break;
+
+		case CONNECTION_STATE_MULTITRANSPORT_BOOTSTRAPPING:
+			rdp->state = CONNECTION_STATE_MULTITRANSPORT_BOOTSTRAPPING;
+			break;
+
+		case CONNECTION_STATE_CAPABILITIES_EXCHANGE:
+			rdp->state = CONNECTION_STATE_CAPABILITIES_EXCHANGE;
+			break;
+
+		case CONNECTION_STATE_FINALIZATION:
+			rdp->state = CONNECTION_STATE_FINALIZATION;
+			update_reset_state(rdp->update);
+			rdp->finalize_sc_pdus = 0;
+			break;
+
+		case CONNECTION_STATE_ACTIVE:
+			rdp->state = CONNECTION_STATE_ACTIVE;
+			{
+				ActivatedEventArgs activatedEvent;
+				rdpContext* context = rdp->context;
+				EventArgsInit(&activatedEvent, "libfreerdp");
+				activatedEvent.firstActivation = !rdp->deactivation_reactivation;
+				PubSub_OnActivated(context->pubSub, context, &activatedEvent);
+			}
+
+			break;
+
+		default:
+			status = -1;
+			break;
+	}
+
+	{
+		ConnectionStateChangeEventArgs stateEvent;
+		rdpContext* context = rdp->context;
+		EventArgsInit(&stateEvent, "libfreerdp");
+		stateEvent.state = rdp->state;
+		stateEvent.active = rdp->state == CONNECTION_STATE_ACTIVE;
+		PubSub_OnConnectionStateChange(context->pubSub, context, &stateEvent);
+	}
+
+	return status;
+}
+```
