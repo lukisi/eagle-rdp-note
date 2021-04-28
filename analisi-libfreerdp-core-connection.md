@@ -496,3 +496,23 @@ int rdp_client_transition_to_state(rdpRdp* rdp, int state)
 	return status;
 }
 ```
+
+Nel documento a questo [link](analisi-winpr-pubsub.md)
+faccio una analisi delle modalità con cui viene realizzata
+nel progetto FreeRDP la gestione degli eventi.
+
+Nella struttura `rdp` c'è un membro `context` in cui c'è un membro `pubSub`.
+
+*Nota:* `rdp` è un puntatore a `rdpRdp`, che è typedef a
+`struct rdp_rdp` nel file `include/freerdp/freerdp.h`.  
+La definizione di `struct rdp_rdp` è nel file `libfreerdp/core/rdp.h`.  
+`context` è un puntatore a `rdpContext`, che è typedef a
+`struct rdp_context` nel file `include/freerdp/freerdp.h`.  
+La definizione di `struct rdp_context` è nel file `include/freerdp/freerdp.h`.  
+`pubSub` è un puntatore a `wPubSub`, che è definito secondo le modalità
+descritte nel documento al [link](analisi-winpr-pubsub.md) di cui sopra.
+
+Le funzioni `PubSub_OnActivated` e `PubSub_OnConnectionStateChange`
+sono definite come eventi nel file `include/freerdp/event.h`.
+
+
