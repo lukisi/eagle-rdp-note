@@ -18,8 +18,121 @@ Alcune delle caratteristiche salienti della gestione di eventi realizzata con qu
 libreria sono di seguito riportate. In particolare annoto quelle che possono
 interessarmi nello sviluppo/debug di un client basato su `libfreerdp`.
 
-Events enable a class or object to notify other classes or objects when something of interest occurs. The class that sends (or raises) the event is called the publisher and the classes that receive (or handle) the event are called subscribers.
+Gli *eventi* permettono a un *publisher* (di norma una classe o un oggetto) di
+notificare che è accaduto qualcosa di interessante (si dice *sollevare/raise*
+un evento).  
+Questa notifica arriva ad un set di *subscribers* (di norma classi/oggetti) che
+hanno espresso il loro interesse a ricevere tale notifica (si dice *gestire/handle*
+l'evento).
 
+Solo il publisher determina quando un evento è sollevato. I subscribers determinano
+quali azioni intraprendere quando l'evento è loro notificato.
+
+Un evento può avere molti subscribers. Un subscriber può essere interessato a
+gestire diversi eventi da diversi publishers.
+
+Quando un publisher solleva un evento, se questo ha diversi subscribers, questi
+vengono notificati in modo sincrono.
+
+La libreria di .NET (non so ancora quanto sia applicabile a `libwinpr`) fornisce
+una classe `EventArgs` praticamente vuota (eredita `Object`) che può essere usata
+come classe base per un generico contenitore di dati relativi ad un evento.  
+Inoltre fornisce il *delegato* (puntatore a funzione) `EventHandler` che
+rappresenta il più semplice gestore di eventi:
+
+```c#
+public delegate void EventHandler(object? sender, EventArgs e);
+```
+
+### Declare an event
+
+Assumiamo di definire una classe. Questa rappresenta i bottoni della UI. Ogni
+istanza è un bottone di una app. Ogni bottone è un publisher nel senso che
+notifica a chiunque sia interessato (subscribers) l'evento che l'utente della
+app ha fatto click sul bottone.
+
+Per prima cosa definisco le caratteristiche dell'evento. Ad esempio definisco
+una classe con i dati dell'evento che mi aiuti a descrivere tutta la firma
+dell'evento in modo semplice e leggibile.  
+Nel caso in esame diciamo che l'evento è molto semplice. Potrei fare a meno
+di definire una classe diversa dalla base, ma solo per completezza diciamo
+che definisco la classe `ButtonClickedEventArgs` che estende `EventArgs` senza
+in effetti aggiungere altro.  
+In conclusione la firma sarà molto simile al `EventHandler` ma, sempre
+per completezza, dichiaro un nuovo delegato `ButtonClickedEventHandler`:
+
+```c#
+public class ButtonClickedEventArgs : EventArgs
+{
+    ...
+}
+
+public delegate void ButtonClickedEventHandler(Button sender,
+        ButtonClickedEventArgs e);
+```
+
+Poi nella classe dichiaro che faccio le veci di publisher notificando
+l'evento `OnClick` secondo la firma prima definita.  
+In qualche parte del codice della mia classe sollevo l'evento.
+
+```c#
+public class Button : Object
+{
+    ...
+
+    public event ButtonClickedEventHandler OnClick;
+
+    blabla miafunc() {
+        ...
+        // Event will be null if there are no subscribers
+        if (OnClick != null) {
+            OnClick(this, new ButtonClickedEventArgs());
+        }
+    }
+}
+```
+
+### Subscribe to an event
+
+Assumiamo che sia stato definito un evento che può essere notificato da un
+publisher. Diciamo che nel mio codice ho accesso a questo publisher (ad esempio
+una istanza di un UI button, `Button launch;`) e voglio registrare un
+gestore ad uno specifico evento che conosco (ad esempio `OnClick` è un evento
+della classe `Button` come definita sopra).
+
+Definisco una funzione (o metodo) la cui firma combacia con la firma dell'evento
+definito. Ad esempio:
+
+```c#
+void handleLaunchClick(Button sender, ButtonClickedEventArgs e)  
+{  
+   // Do something useful here.  
+}
+```
+
+Con la sintassi a seconda del linguaggio (in C# si usa l'operatore `+=`) si
+registra il gestore all'evento.
+
+```c#
+// explicit:
+launch.OnClick += new ButtonClickedEventHandler(handleLaunchClick);
+// sugar syntax in C# 2.0:
+launch.OnClick += handleLaunchClick;
+```
+
+#### Unsubscribe from an event
+
+Se voglio annullare la registrazione del mio codice alla gestione dell'evento
+(si dice *unsubscribe* dall'evento) uso questa sintassi.  
+*Nota:* Necessario per evitare *resource leaks*, particolarmente se il subscriber è
+un oggetto (istanza di classe).
+
+```c#
+// explicit:
+launch.OnClick -= new ButtonClickedEventHandler(handleLaunchClick);
+// sugar syntax in C# 2.0:
+launch.OnClick -= handleLaunchClick;
+```
 
 ## Definizione di eventi
 
