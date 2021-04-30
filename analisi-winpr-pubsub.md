@@ -177,6 +177,14 @@ launch.Clicked -= handleLaunchClicked;
 
 ## Definizione di eventi
 
+Il client FreeRDP fa uso di una programmazione event-driven in alcune sue
+parti. Ad esempio nella fase di negoziazione iniziale viene sollevato
+varie volte l'evento `ConnectionStateChange`, poi nella parte finale
+viene sollevato l'evento `Activated`.  
+Per seguire bene le operazioni durante una sessione di debug occorre
+quindi capire come tali eventi sono stati dichiarati dal publisher
+e quali subscriber verranno attivati.
+
 Le funzioni `PubSub_OnActivated` e `PubSub_OnConnectionStateChange`
 sono definite tramite dei blocchi `DEFINE_EVENT_BEGIN` e `DEFINE_EVENT_END`;
 queste *keyword* sono realizzate con delle istruzioni `#define`
@@ -192,7 +200,60 @@ con il seguente blocco nel file `include/freerdp/event.h`:
 	DEFINE_EVENT_END(Activated)
 ```
 
+che si espande così:
+
+```c
+typedef struct _ActivatedEventArgs {
+    wEventArgs e;
+    BOOL firstActivation;
+} ActivatedEventArgs;
+
+typedef void (*pActivatedEventHandler)(void* context, ActivatedEventArgs* e);
+
+static inline int PubSub_OnActivated(wPubSub* pubSub, void* context, ActivatedEventArgs* e) {
+     return PubSub_OnEvent(pubSub, "Activated", context, (wEventArgs*)e);
+}
+
+static inline int PubSub_SubscribeActivated(wPubSub* pubSub, pActivatedEventHandler EventHandler) {
+     return PubSub_Subscribe(pubSub, "Activated", (pEventHandler)EventHandler);
+}
+
+static inline int PubSub_UnsubscribeActivated(wPubSub* pubSub, pActivatedEventHandler EventHandler) {
+     return PubSub_Unsubscribe(pubSub, "Activated", (pEventHandler)EventHandler);
+}
+```
+
+Le funzioni `PubSub_OnEvent`, `PubSub_Subscribe`, `PubSub_Unsubscribe` sono
+definite nel file `winpr/libwinpr/utils/collections/PubSub.c`.
+
+Il fatto che una classe sia publisher di un certo evento viene dichiarato
+con un `wEventType` messo in un array che poi viene passato insieme
+al `wPubSub` alla funzione `PubSub_AddEventTypes`, sempre
+definita nel file `winpr/libwinpr/utils/collections/PubSub.c`.
+
+Una istanza di `wEventType` si definisce con:
+
+```c
+DEFINE_EVENT_ENTRY(Activated)
+```
+
+che si espande così:
+
+```c
+{
+     "Activated", // EventName : string
+     {
+        sizeof(ActivatedEventArgs), // Size : DWORD, unit32_t
+        ((void *)0) // Sender : string
+     }, // EventArgs : wEventArgs
+     0, // EventHandlerCount : size_t
+     {
+        ((void *)0) // delegate void (*pEventHandler)(void* context, wEventArgs* e);
+     } // EventHandlers : array of pEventHandler
+},
+```
+
 ## Raise di eventi
 
-In conclusione, la sintassi `PubSub_OnActivated(context->pubSub, context, &activatedEvent);` significa
+In conclusione, la sintassi `PubSub_OnActivated(context->pubSub, context, &activatedEvent);` significa... **TODO**
 
