@@ -34,11 +34,17 @@ gestire diversi eventi da diversi publishers.
 Quando un publisher solleva un evento, se questo ha diversi subscribers, questi
 vengono notificati in modo sincrono.
 
-La libreria di .NET (non so ancora quanto sia applicabile a `libwinpr`) fornisce
+### Libreria .NET - sintassi in C\#
+
+Guardare cosa offre la libreria .NET e capire la sintassi del linguaggio C\#
+sarà molto utile per approfondire la libreria `libwinpr`, la quale si basa
+sulla stessa logica e offre molte analogie.
+
+La libreria di .NET fornisce
 una classe `EventArgs` praticamente vuota (eredita `Object`) che può essere usata
 come classe base per un generico contenitore di dati relativi ad un evento.  
 Inoltre fornisce il *delegato* (puntatore a funzione) `EventHandler` che
-rappresenta il più semplice gestore di eventi:
+rappresenta la più semplice firma per un gestore di eventi:
 
 ```c#
 public delegate void EventHandler(object? sender, EventArgs e);
