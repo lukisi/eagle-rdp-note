@@ -78,7 +78,7 @@ public delegate void ButtonClickedEventHandler(Button sender,
 ```
 
 Poi nella classe dichiaro che faccio le veci di publisher notificando
-l'evento `OnClick` secondo la firma prima definita.  
+l'evento `Clicked` secondo la firma prima definita.  
 In qualche parte del codice della mia classe sollevo l'evento.
 
 ```c#
@@ -86,13 +86,48 @@ public class Button : Object
 {
     ...
 
-    public event ButtonClickedEventHandler OnClick;
+    public event ButtonClickedEventHandler Clicked;
 
     blabla miafunc() {
         ...
         // Event will be null if there are no subscribers
-        if (OnClick != null) {
-            OnClick(this, new ButtonClickedEventArgs());
+        if (Clicked != null) {
+            Clicked(this, new ButtonClickedEventArgs());
+        }
+    }
+}
+```
+
+**Attenzione:** il fatto che l'evento sia dichiarato *public* implica che da qualsiasi
+punto del codice si può registrare un handler. Ma questo non toglie che
+**solo la classe publisher può sollevare il suo proprio evento**
+(in questo caso `Button`). Se si vuole fare in modo che la classe publisher
+possa essere usata come classe base e che le classi
+che derivano possano avere del codice specializzato che solleva questo evento
+occorre aggirare il meccanismo.  
+La soluzione suggerita consiste nel creare un
+metodo *protetto* che al suo interno solleva l'evento. Il
+nome della funzione di norma è `On<eventname>`, ad esempio `OnClicked`.
+
+Il codice di cui sopra diventa:
+
+```c#
+public class Button : Object
+{
+    ...
+
+    public event ButtonClickedEventHandler Clicked;
+
+    blabla miafunc() {
+        ...
+        OnClicked(new ButtonClickedEventArgs());
+        }
+    }
+
+    protected virtual void OnClicked(ButtonClickedEventArgs e) {
+        // Event will be null if there are no subscribers
+        if (Clicked != null) {
+            Clicked(this, e);
         }
     }
 }
@@ -103,14 +138,14 @@ public class Button : Object
 Assumiamo che sia stato definito un evento che può essere notificato da un
 publisher. Diciamo che nel mio codice ho accesso a questo publisher (ad esempio
 una istanza di un UI button, `Button launch;`) e voglio registrare un
-gestore ad uno specifico evento che conosco (ad esempio `OnClick` è un evento
+gestore ad uno specifico evento che conosco (ad esempio `Clicked` è un evento
 della classe `Button` come definita sopra).
 
 Definisco una funzione (o metodo) la cui firma combacia con la firma dell'evento
 definito. Ad esempio:
 
 ```c#
-void handleLaunchClick(Button sender, ButtonClickedEventArgs e)  
+void handleLaunchClicked(Button sender, ButtonClickedEventArgs e)  
 {  
    // Do something useful here.  
 }
@@ -121,9 +156,9 @@ registra il gestore all'evento.
 
 ```c#
 // explicit:
-launch.OnClick += new ButtonClickedEventHandler(handleLaunchClick);
+launch.Clicked += new ButtonClickedEventHandler(handleLaunchClicked);
 // sugar syntax in C# 2.0:
-launch.OnClick += handleLaunchClick;
+launch.Clicked += handleLaunchClicked;
 ```
 
 #### Unsubscribe from an event
@@ -135,9 +170,9 @@ un oggetto (istanza di classe).
 
 ```c#
 // explicit:
-launch.OnClick -= new ButtonClickedEventHandler(handleLaunchClick);
+launch.Clicked -= new ButtonClickedEventHandler(handleLaunchClicked);
 // sugar syntax in C# 2.0:
-launch.OnClick -= handleLaunchClick;
+launch.Clicked -= handleLaunchClicked;
 ```
 
 ## Definizione di eventi
